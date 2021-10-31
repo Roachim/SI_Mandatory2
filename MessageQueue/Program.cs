@@ -13,7 +13,13 @@ namespace MessageQueue
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine("######################################");
+            string  folderPath = 
+            System.IO.Path.Combine(System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).FullName, "Messages");
+            Console.WriteLine(folderPath);
+            Console.WriteLine("######################################");
             CreateHostBuilder(args).Build().Run();
+            
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
