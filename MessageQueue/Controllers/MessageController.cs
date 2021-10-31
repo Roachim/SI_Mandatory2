@@ -36,7 +36,15 @@ namespace MessageQueue.Controllers
                 return "Folder for that topic does not exist";
             }
             //epoch indcates timeframe of what files in folder to send to getter
-            string epoch = "";
+            
+            DirectoryInfo di = new DirectoryInfo(folderPath);
+            foreach(var file in di.GetFiles()){
+                string epoch = "" + file.Name.Substring(3);
+                if(Convert.ToInt32(lastreceived)  < Convert.ToInt32(epoch)){
+                    //convert to format
+                    //add new formatted string to final file
+                }
+            }
 
             //format indicates what format files should be converted to before sending
 
