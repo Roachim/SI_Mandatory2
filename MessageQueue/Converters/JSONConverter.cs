@@ -10,14 +10,17 @@ namespace MessageQueue
 {
     public static class JSONConverter
     {
-        private static object DeserializeJSON(string JSON)
+        public static object DeserializeJSON(string JSON)
         {
-            //var deserializedJson = JsonSerializer.Deserialize<object>(JSON);
+            //var deserializedJson = JsonSerializer.Deserialize<object>(JSON);            
 
-            var deserializedJson = JsonConvert.DeserializeObject(JSON);            
+            return JsonConvert.DeserializeObject(JSON);
 
-            
+        }
 
+        public static string SerializeJSON(object item)
+        {
+            return JsonConvert.SerializeObject(item);
         }
     }
 }
