@@ -34,7 +34,7 @@ namespace MessageQueue
             csvWriter.WriteRecord(input);
 
             // make sure all records are flushed to stream
-            await csvWriter.FlushAsync();
+            csvWriter.FlushAsync();
 
             Console.WriteLine(csv.ToString());
            

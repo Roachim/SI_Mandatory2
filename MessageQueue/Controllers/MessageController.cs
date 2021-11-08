@@ -40,7 +40,9 @@ namespace MessageQueue.Controllers
             
             DirectoryInfo di = new DirectoryInfo(folderPath);
             foreach(var file in di.GetFiles()){
+                //below should also exlude anything after a '.'
                 string epoch = "" + file.Name.Substring(3);
+                
                 if(Convert.ToInt32(lastreceived)  < Convert.ToInt32(epoch)){
                     //convert to format
                     //add new formatted string to final file

@@ -14,8 +14,9 @@ namespace MessageQueue
         //2. Have 1 central type e.g JSON, which evry type can become. 
         //Json can then become any type ( number of formats * 1(JSON) + 1(JSON) * number of converters = number of converters)
         //3. Have a method that registers a format and converts to the then wished for format. (1 converter)
-        public static string Convert(string file, string fromFormat, string toFormat){
-
+        public static string Convert(string filePath, string toFormat){
+            //Find the format of the file by looking after the '.'
+            //get path to messages
         }
         
         
