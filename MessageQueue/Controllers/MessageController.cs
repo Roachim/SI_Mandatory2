@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Text.Json.Serialization;
 
 
 namespace MessageQueue.Controllers
@@ -18,7 +19,7 @@ namespace MessageQueue.Controllers
         //for consumer to recieve text from a file
         //Using the topic, format and lastreceived
         //search folders for given topic
-        //send all messages that Epoch > then lastreceived 
+        //send all messages where Epoch > lastreceived 
         // - (last received is date and time down to milliseconds - convert to epoch for comparison)
         //All valid messages gets converted to the given format
         //converted messages are then send back to the consumer
@@ -54,20 +55,22 @@ namespace MessageQueue.Controllers
             //return all files
             return null;
         }
-        //Receive a post from any source
-        //Save a posted file in folder with same name as topic topic if it exist - otherwise
-        // - Create a folder for named topic if it does not exist - then save file to it
-        //Topic name should be case insensitive (make function for this)
-        //file name should be 4 random numbers + date and time down to milisecond (have epoch converter)
+        
+        /// <summary>
+        /// Creates a file from any text message sent from any person.
+        /// File is saved in as its own text file in the designated folder
+        /// </summary>
+        /// <param name="fileString">String sent us, may be JSON, CSV, XML or TSV (maybe YAML?)</param>
+        /// <param name="topic">Topic designates the folder this file will be saved in. If folder for topic does not exist: will be created</param>
+        /// <param name="format">The format that the string was sent as. Will be saved as this type. Wait, what if the wrong format is given?!</param>
+        /// <returns>A String. A single message confirming the state of the file, or whether or not there was an error</returns>
         [HttpPost]
         [Route("create")]
         public string CreateMessage([FromBody]string fileString, [FromBody]string topic, [FromBody]string format)
         {
             //Folder for messages
             System.IO.Directory.CreateDirectory(messageFolder); //check if (exist): if not (create)
-
-            //TopicFolder ------ Get the topic from the file read from the post message!!!!!------------------------
-
+            //Folder for messages for that topic
             string folderPath = System.IO.Path.Combine(messageFolder, topic);
 
             //Check if folder exist, if not: create it
@@ -83,7 +86,7 @@ namespace MessageQueue.Controllers
             }
             string fileName = numbers + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()+"."+format;
 
-            //Write file with content in given path. path includes name for new file
+            //Write file with content in given path. folderpath includes name for new file.
             folderPath = System.IO.Path.Combine(folderPath, fileName);
             if(!System.IO.File.Exists(folderPath))
             {
