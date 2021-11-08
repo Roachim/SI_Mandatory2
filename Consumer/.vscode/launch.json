@@ -14,7 +14,10 @@
             "args": [],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "internalConsole",
+            //internalConsole uses the Debug console, it can't accept input such at Console.Readline()
+            //"console": "internalConsole",
+            //integratedTerminal can take input
+            "console": "integratedTerminal",
             "stopAtEntry": false
         },
         {

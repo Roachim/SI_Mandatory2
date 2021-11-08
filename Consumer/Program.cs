@@ -6,7 +6,12 @@ namespace Consumer
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            while (true)
+            {
+                //Client.RequestMessage();
+                System.Console.WriteLine("hi");
+                Console.ReadLine();
+            }
         }
     }
 }
