@@ -6,7 +6,7 @@ using System.Threading;
 using System.Collections;
 using System.Text;
 
-namespace MessageQueue
+namespace MessageQueue.Converters
 {
     public static class CSVConverter
     {

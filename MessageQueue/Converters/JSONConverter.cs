@@ -6,7 +6,7 @@ using System.Collections;
 //using System.Text.Json;
 using Newtonsoft.Json;
 
-namespace MessageQueue
+namespace MessageQueue.Converters
 {
     public static class JSONConverter
     {

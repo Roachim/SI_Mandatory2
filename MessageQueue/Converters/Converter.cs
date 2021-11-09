@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Threading;
 using System.Collections;
 
-namespace MessageQueue
+namespace MessageQueue.Converters
 {
     public static class Converter
     {
