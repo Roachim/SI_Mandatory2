@@ -527,3 +527,8 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+Converter/Scripts/deactivate.bat
+*.bat
+*.ps1
+Converter/Scripts/activate
+Converter/pyvenv.cfg
