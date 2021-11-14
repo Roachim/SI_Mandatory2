@@ -1,7 +1,9 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Net.Http;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 
 
@@ -19,7 +21,7 @@ namespace Consumer
 
         #region Methods
 
-        public static void RequestMessage()
+        public static async void RequestMessage()
         {
             System.Console.WriteLine("Enter topic:");
             string topic = Console.ReadLine();
@@ -34,16 +36,26 @@ namespace Consumer
 
             HttpClient client = new HttpClient();
 
-            Task<HttpResponseMessage> response = client.GetAsync($"http://localhost:5000/message/retrieve?topic={topic}&format={format}&lastReceived={lastreceived}");
+            HttpResponseMessage response = await client.GetAsync($"http://localhost:5000/message/retrieve?topic={topic}&format={format}&lastReceived={lastreceived}");
 
-            if (!response.Result.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
                 UndoLastReceivedUpdate(filePath, lastreceived);
-                Console.WriteLine($"Statuscode: {response.Result.StatusCode}");
+                Console.WriteLine($"Statuscode: {response.StatusCode}");
                 return;
             }
 
-            Console.WriteLine(response.Result.Content.ReadAsStringAsync());
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            
+            List<string> messages = JsonSerializer.Deserialize<List<string>>(jsonResponse);
+
+            foreach (string message in messages)
+            {
+                Console.WriteLine("########################");
+                Console.WriteLine(message);
+                Console.WriteLine();
+            }
+            
 
             Console.WriteLine("Press any key to request new message");
             Console.ReadLine();

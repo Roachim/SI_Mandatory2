@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Consumer
 {
@@ -8,9 +9,7 @@ namespace Consumer
         {
             while (true)
             {
-                //Client.RequestMessage();
-                System.Console.WriteLine("hi");
-                Console.ReadLine();
+                Task.Run(() => Client.RequestMessage());
             }
         }
     }
