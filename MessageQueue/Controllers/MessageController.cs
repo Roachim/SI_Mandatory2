@@ -8,7 +8,6 @@ using System.Text.Json.Serialization;
 using MessageQueue.DTO;
 using MessageQueue.DTOinterfaces;
 using System.Collections;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 
@@ -91,12 +90,12 @@ namespace MessageQueue.Controllers
         /// <returns>A String. A single message confirming the state of the file, or whether or not there was an error</returns>
         [HttpPost]
         [Route("create")]
-        public string CreateMessage([FromBody]string fileString, [FromBody]string topic, [FromBody]string format)
+        public string CreateMessage([FromBody]CreateMessageDTO File)
         {
             //Folder for messages
             System.IO.Directory.CreateDirectory(messageFolder); //check if (exist): if not (create)
             //Folder for messages for that topic
-            string folderPath = System.IO.Path.Combine(messageFolder, topic);
+            string folderPath = System.IO.Path.Combine(messageFolder, File.Topic);
 
             //Check if folder exist, if not: create it
             System.IO.Directory.CreateDirectory(folderPath); //this method automatically checks if folder exist before creating it.
@@ -109,14 +108,14 @@ namespace MessageQueue.Controllers
             {
                 numbers = numbers +rand.Next(10);
             }
-            string fileName = numbers + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()+"."+format;
+            string fileName = numbers + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()+"."+File.Format;
 
             //Write file with content in given path. folderpath includes name for new file.
             folderPath = System.IO.Path.Combine(folderPath, fileName);
             if(!System.IO.File.Exists(folderPath))
             {
                 try{
-                    System.IO.File.WriteAllText(folderPath, fileString); //won't accept just "File" as starter for method, must include "System.IO" first for some reason
+                    System.IO.File.WriteAllText(folderPath, File.FileString); //won't accept just "File" as starter for method, must include "System.IO" first for some reason
                 }
                 catch
                 {
