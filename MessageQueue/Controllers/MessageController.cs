@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using MessageQueue.DTO;
 using MessageQueue.DTOinterfaces;
 using System.Collections;
 using System.Net.Http;
 using System.Text;
+
 
 
 namespace MessageQueue.Controllers
@@ -19,7 +21,7 @@ namespace MessageQueue.Controllers
     public class MessageController : ControllerBase
     {
         //path to folder for all messages
-        string messageFolder = System.IO.Path.Combine(System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).FullName, "Messages");
+        string messageFolder = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Messages");
         private static readonly HttpClient client = new HttpClient();
         
         //for consumer to recieve text from a file
@@ -35,6 +37,11 @@ namespace MessageQueue.Controllers
         {
             //Path indicated by topic
             string folderPath = System.IO.Path.Combine(messageFolder, topic);
+
+            if (!System.IO.Directory.Exists(folderPath))
+            {
+                return "Topic does not exist";
+            }
             try{
                 System.IO.Directory.Exists(folderPath);
             }
@@ -52,9 +59,11 @@ namespace MessageQueue.Controllers
                 //Below function gets the epoch by removing the first random letters and removing file --
                 //format from name by splitting after any '.' and taking everything before it.
                 //epoch indcates timeframe of what files in folder to send to getter
-                string epoch = "" + file.Name.Substring(3);
+                System.Console.WriteLine("################");
+                System.Console.WriteLine(file.Name);
+                string epoch = file.Name.Substring(3);
                 epoch = epoch.Split('.',2)[0];
-                string fileFormat = epoch.Split('.',2)[1];
+                string fileFormat = file.Name.Split('.',2)[1];
                 
                 //- find every instance meeting criteria
                 //- Any instance will become 'message' object with their format
@@ -70,7 +79,7 @@ namespace MessageQueue.Controllers
             //Send this to python module
             MessageList packet = new MessageList(messageList, format);
             //http request
-            HttpContent content = new StringContent(packet.ToString(), Encoding.UTF8, "application/json");
+            HttpContent content = new StringContent(JsonSerializer.Serialize(packet), Encoding.UTF8, "application/json");
             //Send to python module
             //send to and receieve content
             HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:6000/convert", content);
