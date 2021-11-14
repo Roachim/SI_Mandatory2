@@ -5,6 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using System.Text.Json.Serialization;
+using MessageQueue.DTO;
+using MessageQueue.DTOinterfaces;
+using System.Collections;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
 
 
 namespace MessageQueue.Controllers
@@ -15,6 +21,7 @@ namespace MessageQueue.Controllers
     {
         //path to folder for all messages
         string messageFolder = System.IO.Path.Combine(System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).FullName, "Messages");
+        private static readonly HttpClient client = new HttpClient();
         
         //for consumer to recieve text from a file
         //Using the topic, format and lastreceived
@@ -25,7 +32,7 @@ namespace MessageQueue.Controllers
         //converted messages are then send back to the consumer
         [HttpGet]
         [Route("retrieve")]
-        public string RetrieveMessage([FromQuery]string topic, [FromQuery]String format, [FromQuery]string lastreceived)
+        public async Task<string> RetrieveMessage([FromQuery]string topic, [FromQuery]String format, [FromQuery]string lastreceived)
         {
             //Path indicated by topic
             string folderPath = System.IO.Path.Combine(messageFolder, topic);
@@ -34,28 +41,44 @@ namespace MessageQueue.Controllers
             }
             catch
             {
-                return "Folder for that topic does not exist";
+                
             }
-            //epoch indcates timeframe of what files in folder to send to getter
             
+            
+            //Have a list to add every object made from files in folderpath
+            List<Message> messageList = new List<Message>();
+
             DirectoryInfo di = new DirectoryInfo(folderPath);
             foreach(var file in di.GetFiles()){
-                //below should also exlude anything after a '.'
+                //Below function gets the epoch by removing the first random letters and removing file --
+                //format from name by splitting after any '.' and taking everything before it.
+                //epoch indcates timeframe of what files in folder to send to getter
                 string epoch = "" + file.Name.Substring(3);
+                epoch = epoch.Split('.',2)[0];
+                string fileFormat = epoch.Split('.',2)[1];
                 
-                if(Convert.ToInt32(lastreceived)  < Convert.ToInt32(epoch)){
-                    //convert to format
-                    //add new formatted string to final file
+                //- find every instance meeting criteria
+                //- Any instance will become 'message' object with their format
+                //- They will then be added to 'MessageList' object
+                //- 'MessageList' will also get a string for the format that every 'Message' is to be converted to.
+                if(Convert.ToInt64(lastreceived)  < Convert.ToInt64(epoch)){
+                    Message message = new Message(file.OpenText().ReadToEnd(), fileFormat);
+                    messageList.Add(message);
+                    
+
                 }
             }
-
-            //format indicates what format files should be converted to before sending
-
-            //have methods to convert from - to different formats here
-            //switch;
-
+            //Send this to python module
+            MessageList packet = new MessageList(messageList, format);
+            //http request
+            HttpContent content = new StringContent(packet.ToString(), Encoding.UTF8, "application/json");
+            //Send to python module
+            //send to and receieve content
+            HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:4444/server2/calculate/django/dynamic", content);
+            //get this pack from python module converter
+            
             //return all files
-            return null;
+            return await response.Content.ReadAsStringAsync();
         }
         
         /// <summary>

@@ -17,8 +17,10 @@ namespace MessageQueue.Converters
         public static string Convert(string filePath, string toFormat){
             //Gets a collection with the unread messages, and their format
             //Also needs the format that the messages should be converted to
+
             //Sends a request to an external api for conversion
             //Returns a list of the converted messages
+            
         }
         
         
