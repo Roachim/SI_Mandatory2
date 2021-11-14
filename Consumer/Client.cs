@@ -28,7 +28,7 @@ namespace Consumer
 
             System.Console.WriteLine("Enter format:");
 
-            string format = Console.ReadLine();
+            string format = Console.ReadLine().ToLower();
 
             string filePath = $"{_path}{topic}.txt";
 
