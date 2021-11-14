@@ -74,7 +74,7 @@ namespace MessageQueue.Controllers
             HttpContent content = new StringContent(packet.ToString(), Encoding.UTF8, "application/json");
             //Send to python module
             //send to and receieve content
-            HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:4444/server2/calculate/django/dynamic", content);
+            HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:6000/convert", content);
             //get this pack from python module converter
             
             //return all files
