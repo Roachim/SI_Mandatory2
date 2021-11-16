@@ -61,7 +61,7 @@ namespace MessageQueue.Controllers
                 //epoch indcates timeframe of what files in folder to send to getter
                 System.Console.WriteLine("################");
                 System.Console.WriteLine(file.Name);
-                string epoch = file.Name.Substring(3);
+                string epoch = file.Name.Substring(4);
                 epoch = epoch.Split('.',2)[0];
                 string fileFormat = file.Name.Split('.',2)[1];
                 
