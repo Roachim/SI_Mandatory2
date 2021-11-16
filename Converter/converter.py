@@ -14,32 +14,42 @@ def do():
     messages = json.load(request.body)
     convertToFormat = str(messages['FormatTo']).lower()
 
-    jsonMessages = []
+    messagesToConvert = {}
     convertedMessages = []
 
     for message in messages['Messages']:
         messageText = message['Text']
+        if str(message['Format']).lower() == convertToFormat:
+            messagesToConvert.update({messageText: "false"})
+            continue
         match str(message['Format']).lower():
             case 'json':
-                jsonMessages.append(messageText)
+                messagesToConvert.update({messageText: "true"})
+                #jsonMessages.append(messageText)
             case 'xml':
-                jsonMessages.append(xmlToJson(messageText))
+                messagesToConvert.update({xmlToJson(messageText): "true"})
+                #jsonMessages.append(xmlToJson(messageText))
             case 'csv':
-                jsonMessages.append(csvToJson(messageText))
+                messagesToConvert.update({csvToJson(messageText): "true"})
+                #jsonMessages.append(csvToJson(messageText))
             case 'tsv':
-                jsonMessages.append(tsvToJson(messageText))
+                messagesToConvert.update({tsvToJson(messageText): "true"})
+                #jsonMessages.append(tsvToJson(messageText))
     
     if convertToFormat == 'json':
-        return json.dumps(jsonMessages)
+        return json.dumps(list(messagesToConvert.keys()))
     
-    for message in jsonMessages:
+    for message in messagesToConvert.items():
+        if message[1] == "false":
+            convertedMessages.append(message[0])
+            continue
         match convertToFormat:
             case 'xml':
-                convertedMessages.append(jsonToXml(message))
+                convertedMessages.append(jsonToXml(message[0]))
             case 'csv':
-                convertedMessages.append(jsonToCsv(message))
+                convertedMessages.append(jsonToCsv(message[0]))
             case 'tsv':
-                convertedMessages.append(jsonToTsv(message))
+                convertedMessages.append(jsonToTsv(message[0]))
     
     return json.dumps(convertedMessages)
 
@@ -54,7 +64,9 @@ def csvToJson(message):
 
 def tsvToJson(message):
     preparedTsv = pd.read_csv(io.StringIO(message), sep='\t')
-    return preparedTsv.to_json()
+    preparedTsv2 = csv.DictReader(io.StringIO(message), delimiter='\t')
+    #preparedTsv.to_json()
+    return json.dumps(list(preparedTsv2))
 
 
 #Functions for converting JSON to XML, CSV and TSV
