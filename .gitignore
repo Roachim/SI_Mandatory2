@@ -527,6 +527,8 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+#Ignore all script files in converter for python
+Converter/Scripts/
 Converter/Scripts/deactivate.bat
 *.bat
 *.ps1
