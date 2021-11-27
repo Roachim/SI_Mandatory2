@@ -22,32 +22,30 @@ namespace MessageQueue.Controllers
     {
         //path to folder for all messages
         string messageFolder = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Messages");
+        //make httpClient to handle http requests
         private static readonly HttpClient client = new HttpClient();
-        
-        //for consumer to recieve text from a file
-        //Using the topic, format and lastreceived
-        //search folders for given topic
-        //send all messages where Epoch > lastreceived 
-        // - (last received is date and time down to milliseconds - convert to epoch for comparison)
-        //All valid messages gets converted to the given format
-        //converted messages are then send back to the consumer
+
+        /// <summary>
+        /// A function for consumers to get all files they have yet to receive
+        /// </summary>
+        /// <param name="topic">The folder for the files they wish to receive</param>
+        /// <param name="format">The format they wish to receive the file text in</param>
+        /// <param name="lastreceived">The timestamp the user gives to indicate when they last received files, down to miliseconds</param>
+        /// <returns>A converted string with all the content from files</returns>
         [HttpGet]
         [Route("retrieve")]
         public async Task<string> RetrieveMessage([FromQuery]string topic, [FromQuery]String format, [FromQuery]string lastreceived)
         {
+            //case insensitize
+            topic = topic.ToLower();
+            format = format.ToLower();
+
             //Path indicated by topic
             string folderPath = System.IO.Path.Combine(messageFolder, topic);
 
             if (!System.IO.Directory.Exists(folderPath))
             {
                 return "Topic does not exist";
-            }
-            try{
-                System.IO.Directory.Exists(folderPath);
-            }
-            catch
-            {
-                
             }
             
             
@@ -72,23 +70,71 @@ namespace MessageQueue.Controllers
                 if(Convert.ToInt64(lastreceived)  < Convert.ToInt64(epoch)){
                     Message message = new Message(file.OpenText().ReadToEnd(), fileFormat);
                     messageList.Add(message);
-                    
-
                 }
             }
             //Send this to python module
             MessageList packet = new MessageList(messageList, format);
-            //http request
+            //make http content
             HttpContent content = new StringContent(JsonSerializer.Serialize(packet), Encoding.UTF8, "application/json");
-            //Send to python module
-            //send to and receieve content
+            //Make http request to python module
             HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:6000/convert", content);
-            //get this pack from python module converter
+            
+            //return all files to consumer
+            return await response.Content.ReadAsStringAsync();
+        }
+        
+        /// <summary>
+        /// A function for consumers to get all files
+        /// </summary>
+        /// <param name="topic">The folder for the files they wish to receive</param>
+        /// <param name="format">The format they wish to receive the file text in</param>
+        /// <returns>A converted string with all the content from files</returns>
+        [HttpGet]
+        [Route("retrieveAll")]
+        public async Task<string> RetrieveAll([FromQuery]string topic, [FromQuery]String format)
+        {
+            //case insensitize
+            topic = topic.ToLower();
+            format = format.ToLower();
+
+            //Path indicated by topic
+            string folderPath = System.IO.Path.Combine(messageFolder, topic);
+
+            if (!System.IO.Directory.Exists(folderPath))
+            {
+                return "Topic does not exist";
+            }
+            // -- maybe make a catch for when user tries to use none-supported format?
+
+            //Have a list to add every object made from files in folderpath
+            List<Message> messageList = new List<Message>();
+
+            DirectoryInfo di = new DirectoryInfo(folderPath);
+            foreach(var file in di.GetFiles()){
+                //Get format by splitting by '.' and getting the latter part.
+                // System.Console.WriteLine("################");
+                // System.Console.WriteLine(file.Name);
+                string fileFormat = file.Name.Split('.',2)[1];
+                
+                //- Every instance will become a 'message' object with their format attached
+                //- They will then be added to 'MessageList' object
+                //- 'MessageList' will also get a string for the format that every 'Message' is to be converted to.
+                
+                Message message = new Message(file.OpenText().ReadToEnd(), fileFormat);
+                messageList.Add(message);
+            }
+            //make packet to send to python converter
+            MessageList packet = new MessageList(messageList, format);
+            //Make content for http request
+            HttpContent content = new StringContent(JsonSerializer.Serialize(packet), Encoding.UTF8, "application/json");
+            //Make http request to python converter
+            HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:6000/convert", content);
             
             //return all files
             return await response.Content.ReadAsStringAsync();
         }
-        
+
+
         /// <summary>
         /// Creates a file from any text message sent from any person.
         /// File is saved in as its own text file in the designated folder
@@ -141,5 +187,10 @@ namespace MessageQueue.Controllers
 
             return "File Recorded in queue";
         }
+        
+
     }
+
+    
+    
 }
