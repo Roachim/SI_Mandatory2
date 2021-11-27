@@ -65,9 +65,8 @@ def csvToJson(message):
     return json.dumps(list(preparedCsv))
 
 def tsvToJson(message):
-    preparedTsv2 = csv.DictReader(io.StringIO(message), delimiter='\t')
-    #preparedTsv.to_json()
-    return json.dumps(list(preparedTsv2))
+    preparedTsv = csv.DictReader(io.StringIO(message), delimiter='\t')
+    return json.dumps(list(preparedTsv))
 
 
 #Functions for converting JSON to XML, CSV and TSV
