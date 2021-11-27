@@ -525,6 +525,7 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
+
 # Cython debug symbols
 cython_debug/
 #Ignore all script files in converter for python
@@ -534,3 +535,5 @@ Converter/Scripts/deactivate.bat
 *.ps1
 Converter/Scripts/activate
 Converter/pyvenv.cfg
+MessageQueue\Messages
+Consumer\lastReceived
