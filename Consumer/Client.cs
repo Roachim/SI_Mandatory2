@@ -53,14 +53,14 @@ namespace Consumer
 
             switch (action)
             {
-                case "all":
+                case "all" or "1":
                     await RequestAllAsync(filePath, topic, format);
                     break;
-                case "unreceived":
+                case "unreceived" or "2":
                     await RequestMessagesAsync(filePath, topic, format);
                     break;
                 default:
-                    Console.WriteLine("Incorrect Action, Please write either: All or Unreceived");
+                    Console.WriteLine("Incorrect Action, Please write either the actions name or its number");
                     break;
             }
         }
