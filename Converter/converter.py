@@ -17,28 +17,30 @@ def do():
     messagesToConvert = {}
     convertedMessages = []
 
+    #Loops through all the received messages and converts them to json
     for message in messages['Messages']:
         messageText = message['Text']
+        #If a message's current format matches the desired format then it will be added to the conversion dictionary
+        #as a key with the value false, which means that the conversion should skip this message.
         if str(message['Format']).lower() == convertToFormat:
             messagesToConvert.update({messageText: "false"})
             continue
         match str(message['Format']).lower():
             case 'json':
                 messagesToConvert.update({messageText: "true"})
-                #jsonMessages.append(messageText)
             case 'xml':
                 messagesToConvert.update({xmlToJson(messageText): "true"})
-                #jsonMessages.append(xmlToJson(messageText))
             case 'csv':
                 messagesToConvert.update({csvToJson(messageText): "true"})
-                #jsonMessages.append(csvToJson(messageText))
             case 'tsv':
                 messagesToConvert.update({tsvToJson(messageText): "true"})
-                #jsonMessages.append(tsvToJson(messageText))
-    
+
+    #If the desired format is Json, all keys from the dictionary will be added to a list,
+    #which then gets json serialized and returned
     if convertToFormat == 'json':
         return json.dumps(list(messagesToConvert.keys()))
     
+    #Loops through the conversion dictionary and converts all keys with a value of true to the desired format
     for message in messagesToConvert.items():
         if message[1] == "false":
             convertedMessages.append(message[0])
@@ -63,7 +65,6 @@ def csvToJson(message):
     return json.dumps(list(preparedCsv))
 
 def tsvToJson(message):
-    preparedTsv = pd.read_csv(io.StringIO(message), sep='\t')
     preparedTsv2 = csv.DictReader(io.StringIO(message), delimiter='\t')
     #preparedTsv.to_json()
     return json.dumps(list(preparedTsv2))
