@@ -535,5 +535,5 @@ Converter/Scripts/deactivate.bat
 *.ps1
 Converter/Scripts/activate
 Converter/pyvenv.cfg
-MessageQueue\Messages\
-Consumer\lastReceived\
+MessageQueue/Messages/
+Consumer/lastReceived/
