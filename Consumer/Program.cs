@@ -9,7 +9,7 @@ namespace Consumer
         {
             while (true)
             {
-                Task.Run(() => Client.RequestMessage()).Wait();
+                Task.Run(async () => await Client.MakeRequest());
             }
         }
     }
